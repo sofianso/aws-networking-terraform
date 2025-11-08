@@ -42,11 +42,23 @@ inputs = {
   project_name = "aws-networking"
   
   # VPC Configuration
+  # Using 10.2.0.0/16 CIDR block which:
+  # - Provides 65,536 IP addresses (10.2.0.0 - 10.2.255.255)
+  # - Uses private IP range (10.0.0.0/8) as per RFC1918
+  # - Allows room for future expansion
   vpc_cidr             = "10.2.0.0/16"
   availability_zones   = local.region_vars.locals.availability_zones  # Multi-AZ
   
   # Subnet Configuration (Multi-AZ)
+  # Public subnets:
+  # - Use /24 blocks providing 256 IPs each
+  # - Spread across 3 AZs for high availability
+  # - Located in 10.2.1-3.0/24 ranges for easy identification
   public_subnet_cidrs  = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
+  # Private subnets:
+  # - Also use /24 blocks with 256 IPs each
+  # - Spread across same 3 AZs as public subnets
+  # - Located in 10.2.11-13.0/24 ranges, separated from public ranges
   private_subnet_cidrs = ["10.2.11.0/24", "10.2.12.0/24", "10.2.13.0/24"]
   
   # NAT Gateway Configuration - One NAT per AZ for HA

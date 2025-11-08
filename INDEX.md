@@ -161,11 +161,6 @@ Located in `modules/` directory:
   - `variables.tf` - Input variables
   - `outputs.tf` - Output values
 
-- **[modules/github-oidc/](modules/github-oidc/)** - GitHub OIDC authentication
-  - `main.tf` - OIDC provider and IAM role
-  - `variables.tf` - Input variables
-  - `outputs.tf` - Output values
-
 ### Environment Configurations
 Located in environment directories:
 
@@ -174,7 +169,6 @@ Located in environment directories:
   - `ap-southeast-2/region.hcl` - Region configuration
   - `ap-southeast-2/transit-gateway/terragrunt.hcl` - TGW config
   - `ap-southeast-2/vpc/terragrunt.hcl` - VPC config
-  - `ap-southeast-2/github-oidc/terragrunt.hcl` - OIDC config
 
 - **[non-prod/](non-prod/)** - Non-prod account (Single AZ)
   - `account.hcl` - Account configuration
@@ -203,7 +197,6 @@ Located in environment directories:
 | Network diagrams | DIAGRAMS.md | All sections |
 | Make commands | Makefile | Run `make help` |
 | State locks | TROUBLESHOOTING.md | State Lock Issues |
-| OIDC setup | README.md | CI/CD with GitHub Actions |
 | Cost optimization | README.md | Cost Considerations |
 | Security features | README.md | Security Features |
 | Subnet layout | DIAGRAMS.md | Subnet Layout |
@@ -223,7 +216,6 @@ Located in environment directories:
 make help
 
 # Deploy sequence
-make github-oidc-apply
 make networking-tgw-apply
 make networking-vpc-apply
 make non-prod-apply
@@ -261,7 +253,6 @@ make output ENV=networking COMPONENT=vpc
 - **Transit Gateway**: Central networking hub
 - **Multi-AZ**: High availability (Prod, Networking)
 - **Single AZ**: Cost optimization (Non-Prod)
-- **OIDC**: Secure GitHub Actions authentication
 - **Remote State**: S3 + DynamoDB locking
 
 ## 🆘 Getting Help

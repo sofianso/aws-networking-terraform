@@ -7,45 +7,47 @@ This repository contains a comprehensive AWS networking infrastructure setup usi
 ### High-Level Design
 
 ```
+```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Networking Account                        │
+│                    Networking Account                      │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │          Transit Gateway (Central Hub)                 │ │
 │  │  - Routes traffic between all VPCs                     │ │
-│  │  - Separate route tables per environment              │ │
+│  │  - Separate route tables per environment               │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │          Networking VPC (10.0.0.0/16)                 │ │
-│  │  - Multi-AZ (ap-southeast-2a, 1b, 1c)                      │ │
-│  │  - 3 Public Subnets + 3 Private Subnets               │ │
-│  │  - 3 NAT Gateways (High Availability)                 │ │
-│  │  - Internet Gateway                                    │ │
+│  │          Networking VPC (10.0.0.0/16)                  │ │
+│  │  - Multi-AZ (ap-southeast-2a, ap-southeast-2b, ap-southeast-2c) │
+│  │  - 3 Public Subnets + 3 Private Subnets                │ │
+│  │  - 3 NAT Gateways (High Availability)                  │ │
+│  │  - Internet Gateway                                   │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│                   Non-Prod Account                           │
+│                   Non-Prod Account                         │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │         Non-Prod VPC (10.1.0.0/16)                    │ │
-│  │  - Single AZ (ap-southeast-2a) - Cost Optimized            │ │
-│  │  - 1 Public Subnet + 1 Private Subnet                 │ │
-│  │  - 1 NAT Gateway                                       │ │
-│  │  - Internet Gateway                                    │ │
+│  │         Non-Prod VPC (10.1.0.0/16)                     │ │
+│  │  - Single AZ (ap-southeast-2a) - Cost Optimized        │ │
+│  │  - 1 Public Subnet + 1 Private Subnet                  │ │
+│  │  - 1 NAT Gateway                                      │ │
+│  │  - Internet Gateway                                   │ │
 │  │  - Connected to Transit Gateway                       │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│                      Prod Account                            │
+│                      Prod Account                          │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │            Prod VPC (10.2.0.0/16)                     │ │
-│  │  - Multi-AZ (ap-southeast-2a, 1b, 1c)                      │ │
-│  │  - 3 Public Subnets + 3 Private Subnets               │ │
-│  │  - 3 NAT Gateways (High Availability)                 │ │
-│  │  - Internet Gateway                                    │ │
+│  │            Prod VPC (10.2.0.0/16)                      │ │
+│  │  - Multi-AZ (ap-southeast-2a, ap-southeast-2b, ap-southeast-2c) │
+│  │  - 3 Public Subnets + 3 Private Subnets                │ │
+│  │  - 3 NAT Gateways (High Availability)                  │ │
+│  │  - Internet Gateway                                   │ │
 │  │  - Connected to Transit Gateway                       │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
+```
 ```
 
 ### Key Features

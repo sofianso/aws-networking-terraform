@@ -1,0 +1,149 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'prod/**'
+      - 'networking/**'
+      - 'modules/**'
+      - 'terragrunt.hcl'
+      - '.github/workflows/deploy-prod.yml'
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  AWS_REGION: ap-southeast-2
+  TERRAGRUNT_VERSION: 0.93.3
+  TERRAFORM_VERSION: 1.13.5
+  ENVIRONMENT: prod
+
+jobs:
+  deploy-networking:
+    name: Deploy Networking Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          wget -q https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_NETWORKING }}:role/github-oidc-role
+          role-session-name: github-actions-deploy-networking
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terragrunt Init - Networking
+        working-directory: networking/ap-southeast-2
+        run: |
+          terragrunt run-all init --terragrunt-non-interactive
+
+      - name: Terragrunt Plan - Networking
+        working-directory: networking/ap-southeast-2
+        run: |
+          terragrunt run-all plan --terragrunt-non-interactive
+
+      - name: Terragrunt Apply - Networking
+        working-directory: networking/ap-southeast-2
+        run: |
+          terragrunt run-all apply --terragrunt-non-interactive -auto-approve
+
+  deploy-prod:
+    name: Deploy Production VPC
+    runs-on: ubuntu-latest
+    needs: deploy-networking
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          wget -q https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_PROD }}:role/github-oidc-role
+          role-session-name: github-actions-deploy-prod
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terragrunt Init - Prod
+        working-directory: prod/ap-southeast-2
+        run: |
+          terragrunt run-all init --terragrunt-non-interactive
+
+      - name: Terragrunt Plan - Prod
+        working-directory: prod/ap-southeast-2
+        run: |
+          terragrunt run-all plan --terragrunt-non-interactive
+
+      - name: Terragrunt Apply - Prod
+        working-directory: prod/ap-southeast-2
+        run: |
+          terragrunt run-all apply --terragrunt-non-interactive -auto-approve
+
+      - name: Create Deployment Summary
+        if: always()
+        run: |
+          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+  notify-on-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-networking, deploy-prod]
+    if: failure()
+    steps:
+      - name: Create Issue on Failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Production Deployment Failed',
+              body: `## Deployment Failure Alert
+              
+              The production deployment has failed.
+              
+              **Workflow:** ${context.workflow}
+              **Run ID:** ${context.runId}
+              **Commit:** ${context.sha}
+              **Actor:** ${context.actor}
+              
+              [View Failed Workflow](${context.payload.repository.html_url}/actions/runs/${context.runId})
+              
+              Please investigate and resolve the issue.`,
+              labels: ['deployment-failure', 'production', 'critical']
+            })

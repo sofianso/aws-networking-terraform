@@ -1,0 +1,52 @@
+# Terraform and Terragrunt
+.terraform/
+.terragrunt-cache/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+.terraform.lock.hcl
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Sensitive files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dependency graphs
+*.png
+dependency-graph.*
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# environment files
+.env
+.env.local
+.env.*.local

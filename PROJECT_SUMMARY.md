@@ -18,13 +18,10 @@ aws-networking-terraform/
 │   │   ├── variables.tf
 │   │   └── outputs.tf
 │   ├── transit-gateway/                # Transit Gateway hub module
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   └── github-oidc/                    # GitHub OIDC authentication
 │       ├── main.tf
 │       ├── variables.tf
 │       └── outputs.tf
+
 │
 ├── networking/                          # Networking account (central hub)
 │   ├── account.hcl
@@ -33,9 +30,8 @@ aws-networking-terraform/
 │       ├── transit-gateway/
 │       │   └── terragrunt.hcl
 │       ├── vpc/
-│       │   └── terragrunt.hcl
-│       └── github-oidc/
 │           └── terragrunt.hcl
+
 │
 ├── non-prod/                            # Non-prod account (single AZ)
 │   ├── account.hcl
@@ -144,7 +140,6 @@ aws-networking-terraform/
 make help  # See all available commands
 
 # Deploy in order:
-make github-oidc-apply      # 1. Deploy OIDC role
 make networking-tgw-apply   # 2. Deploy Transit Gateway
 make networking-vpc-apply   # 3. Deploy Networking VPC
 make non-prod-apply         # 4. Deploy Non-Prod VPC
@@ -168,7 +163,6 @@ Before deploying, update these files:
 - [ ] `networking/account.hcl` - Set your networking account ID
 - [ ] `non-prod/account.hcl` - Set your non-prod account ID
 - [ ] `prod/account.hcl` - Set your prod account ID
-- [ ] `networking/ap-southeast-2/github-oidc/terragrunt.hcl` - Set GitHub org and repo
 
 ### Optional Customizations
 - [ ] Adjust VPC CIDR blocks in environment terragrunt.hcl files
